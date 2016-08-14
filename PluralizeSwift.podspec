@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = "PluralizeSwift"
-  s.version          = "1.0"
+  s.version          = "1.1"
   s.summary          = "Great Swift String Pluralize Extension"
   s.description      = "case-insensitive, tons of rules for irregular nouns (plural form), supports uncountable nouns, allows dynamic addition of rules"
 
