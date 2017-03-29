@@ -34,7 +34,7 @@
 
 import Foundation
 
-public class Pluralize {
+open class Pluralize {
     var uncountables:[String] = []
     var rules:[(rule: String, template: String)] = []
 
@@ -133,12 +133,12 @@ public class Pluralize {
         unchanging("species")
     }
 
-    public class func apply(word: String) -> String {
-        guard !(sharedInstance.uncountables.contains(word.lowercaseString) || word.characters.count == 0) else {
+    open class func apply(_ word: String) -> String {
+        guard !(shared.uncountables.contains(word.lowercased()) || word.characters.count == 0) else {
             return word
         }
 
-        for pair in sharedInstance.rules {
+        for pair in shared.rules {
             let newValue = regexReplace(word, pattern: pair.rule, template: pair.template)
             if newValue != word {
                 return newValue
@@ -148,60 +148,49 @@ public class Pluralize {
         return word
     }
 
-    public class func rule(rule: String, with template: String) {
-        sharedInstance.rule(rule, with: template)
+    open class func rule(_ rule: String, with template: String) {
+        shared.rule(rule, with: template)
     }
 
-    public class func uncountable(word: String) {
-        sharedInstance.uncountable(word)
+    open class func uncountable(_ word: String) {
+        shared.uncountable(word)
     }
 
-    public class func unchanging(word: String) {
-        sharedInstance.unchanging(word)
+    open class func unchanging(_ word: String) {
+        shared.unchanging(word)
     }
 
-    public class var sharedInstance : Pluralize {
-        struct Static {
-            static var onceToken : dispatch_once_t = 0
-            static var instance : Pluralize? = nil
-        }
+    static let shared = Pluralize()
 
-        dispatch_once(&Static.onceToken) {
-            Static.instance = Pluralize()
-        }
-
-        return Static.instance!
-    }
-
-    private class func regexReplace(input: String, pattern: String, template: String) -> String {
-        let regex = try! NSRegularExpression(pattern: pattern, options: .CaseInsensitive)
+    fileprivate class func regexReplace(_ input: String, pattern: String, template: String) -> String {
+        let regex = try! NSRegularExpression(pattern: pattern, options: .caseInsensitive)
         let range = NSRange(location: 0, length: input.characters.count)
-        let output = regex.stringByReplacingMatchesInString(input, options: [], range: range, withTemplate: template)
+        let output = regex.stringByReplacingMatches(in: input, options: [], range: range, withTemplate: template)
         return output
     }
 
-    private func rule(rule: String, with template: String) {
-        rules.insert((rule: rule, template: template), atIndex: 0)
+    fileprivate func rule(_ rule: String, with template: String) {
+        rules.insert((rule: rule, template: template), at: 0)
     }
 
-    private func uncountable(word: String) {
-        uncountables.insert(word.lowercaseString, atIndex: 0)
+    fileprivate func uncountable(_ word: String) {
+        uncountables.insert(word.lowercased(), at: 0)
     }
 
-    private func unchanging(word: String) {
-        uncountables.insert(word.lowercaseString, atIndex: 0)
+    fileprivate func unchanging(_ word: String) {
+        uncountables.insert(word.lowercased(), at: 0)
     }
 }
 
 extension String {
-    public func pluralize(count: Int = 2, with: String = "") -> String {
+    public func pluralize(_ count: Int = 2, with: String = "") -> String {
         guard !(count == 1) else { return self }
         guard with.length != 0 else { return Pluralize.apply(self) }
         return with
     }
 
     // Workaround to allow us to use `count` as an argument name in pluralize() above.
-    private var length: Int {
+    fileprivate var length: Int {
         return self.characters.count
     }
 }
